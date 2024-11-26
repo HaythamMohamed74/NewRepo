@@ -7,8 +7,8 @@ namespace BlogApi.Repository.Interaces
         public Task<IReadOnlyList<Post>>  GetAllPosts();
         public Task<Post>GetById(int id);
         public Task AddPost(Post post);
-        //public Post UpdatePost(Post post);
-        public Task<int> DeletePost(int id);
+        public  Task<Post> UpdatePost(Post post);
+        public Task DeletePost(int id);
 
 
     }

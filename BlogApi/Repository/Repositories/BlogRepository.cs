@@ -1,8 +1,11 @@
 ﻿using BlogApi.Data.Contexts;
 using BlogApi.Data.Entities;
 using BlogApi.Repository.Interaces;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using System.Linq.Expressions;
 
 namespace BlogApi.Repository.Repositories
 {
@@ -18,15 +21,28 @@ namespace BlogApi.Repository.Repositories
 
         public async Task<IReadOnlyList<Post>> GetAllPosts()
         {
-            return await _blogDbContext.Set<Post>().AsNoTracking().ToListAsync();
-            
+
+            var posts = await _blogDbContext.Set<Post>().AsNoTracking().ToListAsync();
+            if (posts==null)
+            {
+                throw new Exception("No Posts Found ");
+            }
+            return posts;
+
 
         }
         public async Task AddPost(Post post)
         {
-           
-           await _blogDbContext.Set<Post>().AddAsync(post);
-            await _blogDbContext.SaveChangesAsync();
+            try {
+
+                _blogDbContext.Set<Post>().Add(post);
+                await _blogDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex) {
+                throw new Exception("An Error occured when add new post Post ");
+            }
+            
+       
         }
 
      
@@ -34,24 +50,43 @@ namespace BlogApi.Repository.Repositories
 
         public async Task<Post> GetById(int id)
         {
-           return await _blogDbContext.Set<Post>().FirstOrDefaultAsync(p=>p.Id==id);
+            var post=_blogDbContext.Set<Post>().FindAsync(id);
+            if (post == null)
+            {
+                throw new KeyNotFoundException($"No Todo item with Id {id} found.");
+            }
+            return await post;
 
         }
 
-        public async Task<int> DeletePost(int id)
+        public async Task DeletePost(int id)
         {
-            var entity = _blogDbContext.Set<Post>().Find(id);
-            _blogDbContext.Set<Post>().Remove(entity);
-            //return _blogDbContext.SaveChangesAsync();
-            //await  _blogDbContext.Set<Post>().Where(p => p.Id == 1).ExecuteDeleteAsync();
+            var post = await _blogDbContext.Set<Post>().FindAsync(id);
+            if (post == null)
+            {
+                throw new Exception($"Post with Id ={id} not Found ");
+            }
+            _blogDbContext.Set<Post>().Remove(post);
             await _blogDbContext.SaveChangesAsync();
-            return id;
+            
 
         }
 
-        //public  Post UpdatePost(Post post)
-        //{
-        //    return  _blogDbContext.Set<Post>()(post);
-        //}
+        public  async Task<Post> UpdatePost(Post  post)  // update by id
+        {
+            //get post
+            //check if post not null
+            //update it
+            var postT= await _blogDbContext.Set<Post>().FindAsync(post.Id);
+            if (post is not null)
+            {
+                post.AuthorName = postT.AuthorName;
+                post.Content = postT.Content;
+                post.Title = postT.Title;
+                return   post;
+
+            }
+            return  null;
+        }
     }
 }
