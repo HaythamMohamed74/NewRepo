@@ -70,7 +70,7 @@ namespace BlogApi.Controllers
             try
             {
                 await _blogRepository.DeletePost(id);
-                return Ok(new { message = $"Todo  with id {id} successfully deleted" });
+                return Ok(new { message = $"Post  with id {id} successfully deleted" });
             }
             catch (Exception ex) { 
             
@@ -107,11 +107,13 @@ namespace BlogApi.Controllers
 
         }
            [HttpPut]
-        public async Task Update(Post post)
+        public async Task<IActionResult> Update(int id, Post post)
         {
-          
-                Ok(await _blogRepository.UpdatePost(post));
-            
+            if (id != post.Id || !ModelState.IsValid) return BadRequest();
+            var result = await _blogRepository.UpdatePost(post);
+            if (!result) return NotFound();
+            return NoContent();
+
 
 
         }
