@@ -69,9 +69,10 @@ namespace BlogApi.Repository.Repositories
             {
                 _logger.LogError("Post with {id} is not Found", id);
             }
-            _blogDbContext.Set<Post>().Remove(post);
+            post.IsDeleted=true;
+            _blogDbContext.Update(post);
             await _blogDbContext.SaveChangesAsync();
-            _logger.LogInformation("Successfully deleted post with ID {Id}.", id);
+            _logger.LogInformation("Successfully Soft deleted post with ID {Id}.", id);
 
 
         }

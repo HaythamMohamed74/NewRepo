@@ -18,6 +18,7 @@ namespace BlogApi.Data.Entities
         public string AuthorName { get; set; }
        
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        [DefaultValue(false)]
         public bool IsDeleted { get; set; }
     }
 }
